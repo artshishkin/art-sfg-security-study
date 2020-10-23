@@ -1,12 +1,14 @@
 package com.artarkatesoft.securitystudy.web.controllers;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.security.crypto.password.LdapShaPasswordEncoder;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.DigestUtils;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class PasswordEncodersTest {
 
@@ -48,6 +50,30 @@ public class PasswordEncodersTest {
         System.out.println(PASSWORD);
         System.out.println(noOpPassword);
         assertEquals(PASSWORD, noOpPassword);
+    }
+
+    @Test
+    void testLdap() {
+        //given
+        PasswordEncoder ldap = new LdapShaPasswordEncoder();
+
+        //when
+        String ldapPassword1 = ldap.encode(PASSWORD);
+        String ldapPassword2 = ldap.encode(PASSWORD);
+
+        //then
+        System.out.println(ldapPassword1);
+        System.out.println(ldapPassword2);
+        assertNotEquals(ldapPassword1, ldapPassword2);
+        assertTrue(ldap.matches(PASSWORD, ldapPassword1));
+        assertTrue(ldap.matches(PASSWORD, ldapPassword2));
+
+        System.out.println("----------------------");
+        System.out.println("getting pwd for config");
+        System.out.println("----------------------");
+        Stream.of("123", "pass222", "tiger")
+                .forEach(pwd -> System.out.printf("%12s\t| %s\n", pwd, ldap.encode(pwd)));
+        System.out.println("----------------------");
     }
 
 
