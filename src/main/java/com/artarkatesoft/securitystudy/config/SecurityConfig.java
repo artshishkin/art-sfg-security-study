@@ -1,11 +1,14 @@
 package com.artarkatesoft.securitystudy.config;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.crypto.password.NoOpPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
 @EnableWebSecurity
@@ -33,13 +36,25 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.inMemoryAuthentication()
 //                .passwordEncoder(NoOpPasswordEncoder.getInstance())
-                .withUser("art").password("{noop}123").roles("ADMIN")
+                .withUser("art")
+//                .password("{noop}123")
+                .password("123")
+                .roles("ADMIN")
                 .and()
-                .withUser("secondUser").password("{noop}pass222").roles("USER");
+                .withUser("secondUser")
+//                .password("{noop}pass222")
+                .password("pass222")
+                .roles("USER");
         auth.inMemoryAuthentication()
                 .withUser("scott")
-                .password("{noop}tiger")
+//                .password("{noop}tiger")
+                .password("tiger")
                 .roles("CUSTOMER");
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return NoOpPasswordEncoder.getInstance();
     }
 
 //    @Bean

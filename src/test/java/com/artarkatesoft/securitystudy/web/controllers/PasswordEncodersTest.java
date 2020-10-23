@@ -1,6 +1,8 @@
 package com.artarkatesoft.securitystudy.web.controllers;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.security.crypto.password.NoOpPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.DigestUtils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -33,4 +35,20 @@ public class PasswordEncodersTest {
         System.out.println(hash2);
         assertNotEquals(hash1, hash2);
     }
+
+    @Test
+    void testNoOpPasswordEncoder() {
+        //given
+        PasswordEncoder noOp = NoOpPasswordEncoder.getInstance();
+
+        //when
+        String noOpPassword = noOp.encode(PASSWORD);
+
+        //then
+        System.out.println(PASSWORD);
+        System.out.println(noOpPassword);
+        assertEquals(PASSWORD, noOpPassword);
+    }
+
+
 }
