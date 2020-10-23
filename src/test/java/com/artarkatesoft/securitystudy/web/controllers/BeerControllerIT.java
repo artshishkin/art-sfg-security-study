@@ -23,6 +23,8 @@ import com.artarkatesoft.securitystudy.repositories.BeerRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -85,12 +87,17 @@ class BeerControllerIT {
                 .build();
     }
 
-    @Test
-    @DisplayName("Entering second user's details should allow access")
-    void initCreationForm() throws Exception {
+    @ParameterizedTest
+    @CsvSource({
+            "art,123",
+            "secondUser,pass222",
+            "scott,tiger"
+    })
+    @DisplayName("Entering RIGHT users' credentials should allow access to beers endpoint")
+    void initCreationForm(String username, String password) throws Exception {
         mockMvc.perform(
                 get("/beers/new")
-                        .with(httpBasic("secondUser", "pass222")))
+                        .with(httpBasic(username, password)))
                 .andExpect(status().isOk())
                 .andExpect(view().name("beers/createBeer"))
                 .andExpect(model().attributeExists("beer"));

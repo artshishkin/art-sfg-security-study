@@ -36,6 +36,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .withUser("art").password("{noop}123").roles("ADMIN")
                 .and()
                 .withUser("secondUser").password("{noop}pass222").roles("USER");
+        auth.inMemoryAuthentication()
+                .withUser("scott")
+                .password("{noop}tiger")
+                .roles("CUSTOMER");
     }
 
 //    @Bean
