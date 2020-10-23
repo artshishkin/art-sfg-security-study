@@ -36,4 +36,13 @@ class BeerRestControllerIT {
                 //then
                 .andExpect(status().isOk());
     }
+
+    @Test
+    void findByUpc() throws Exception {
+        //when
+        mockMvc.perform(get("/api/v1/beerUpc/0123456789"))
+
+                //then
+                .andExpect(status().isOk());
+    }
 }
