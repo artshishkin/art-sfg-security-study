@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.password.LdapShaPasswordEncoder;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.password.StandardPasswordEncoder;
 import org.springframework.util.DigestUtils;
 
 import java.util.stream.Stream;
@@ -73,6 +74,30 @@ public class PasswordEncodersTest {
         System.out.println("----------------------");
         Stream.of("123", "pass222", "tiger")
                 .forEach(pwd -> System.out.printf("%12s\t| %s\n", pwd, ldap.encode(pwd)));
+        System.out.println("----------------------");
+    }
+
+    @Test
+    void testSha256() {
+        //given
+        PasswordEncoder sha256Encoder = new StandardPasswordEncoder();
+
+        //when
+        String sha256Password1 = sha256Encoder.encode(PASSWORD);
+        String sha256Password2 = sha256Encoder.encode(PASSWORD);
+
+        //then
+        System.out.println(sha256Password1);
+        System.out.println(sha256Password2);
+        assertNotEquals(sha256Password1, sha256Password2);
+        assertTrue(sha256Encoder.matches(PASSWORD, sha256Password1));
+        assertTrue(sha256Encoder.matches(PASSWORD, sha256Password2));
+
+        System.out.println("----------------------");
+        System.out.println("getting pwd for config");
+        System.out.println("----------------------");
+        Stream.of("123", "pass222", "tiger")
+                .forEach(pwd -> System.out.printf("%12s\t| %s\n", pwd, sha256Encoder.encode(pwd)));
         System.out.println("----------------------");
     }
 

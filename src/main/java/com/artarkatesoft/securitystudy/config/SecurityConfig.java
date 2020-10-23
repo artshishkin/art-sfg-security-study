@@ -7,8 +7,8 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.crypto.password.LdapShaPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.password.StandardPasswordEncoder;
 
 @Configuration
 @EnableWebSecurity
@@ -35,26 +35,26 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.inMemoryAuthentication()
-//                .passwordEncoder(NoOpPasswordEncoder.getInstance())
+//                .passwordEncoder(new StandardPasswordEncoder())
                 .withUser("art")
 //                .password("{noop}123")
-                .password("{SSHA}2aZ2MSg55bVH2sgFhNYw0tcy1+rl5JHsLXXNBg==")
+                .password("9dcce1f5a7b4de2cd42d166d62af53f58a35f61e17ce39b06d8a90039aa654292bebcd50a0927d24")
                 .roles("ADMIN")
                 .and()
                 .withUser("secondUser")
 //                .password("{noop}pass222")
-                .password("{SSHA}WWyAjJSuxdmicnwiM008pFMGQlEUYQwb5y+HIQ==")
+                .password("fce5c320888c3fbb25e5f73c345861283a63bc4408466c7b7840784468fab3e708410bf30f9109f8")
                 .roles("USER");
         auth.inMemoryAuthentication()
                 .withUser("scott")
 //                .password("{noop}tiger")
-                .password("{SSHA}hZBa7iNMzmAwCueu9Av3KpSxOY07YhaH3Zh05w==")
+                .password("694343133c5f2615b590507a042e529fba735610e09327e7d5c186033288a0bcfcd2b393c1cd9732")
                 .roles("CUSTOMER");
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new LdapShaPasswordEncoder();
+        return new StandardPasswordEncoder();
     }
 
 //    @Bean
