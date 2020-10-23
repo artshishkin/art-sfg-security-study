@@ -85,6 +85,17 @@ class BeerControllerIT {
                 .build();
     }
 
+    @Test
+    @DisplayName("Entering second user's details should allow access")
+    void initCreationForm() throws Exception {
+        mockMvc.perform(
+                get("/beers/new")
+                        .with(httpBasic("secondUser", "pass222")))
+                .andExpect(status().isOk())
+                .andExpect(view().name("beers/createBeer"))
+                .andExpect(model().attributeExists("beer"));
+    }
+
     @WithMockUser(username = "WTF")
     @Test
     void findBeers() throws Exception {
