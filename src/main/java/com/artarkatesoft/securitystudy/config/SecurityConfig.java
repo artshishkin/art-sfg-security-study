@@ -1,14 +1,12 @@
 package com.artarkatesoft.securitystudy.config;
 
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.crypto.password.StandardPasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Configuration
 @EnableWebSecurity
@@ -35,27 +33,27 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.inMemoryAuthentication()
-//                .passwordEncoder(new StandardPasswordEncoder())
+                .passwordEncoder(new BCryptPasswordEncoder())
                 .withUser("art")
 //                .password("{noop}123")
-                .password("9dcce1f5a7b4de2cd42d166d62af53f58a35f61e17ce39b06d8a90039aa654292bebcd50a0927d24")
+                .password("$2a$10$9oSuHCeDq/tcgIA4XMJl1Oe3LsGlqJTYvgj6VnI3EatWRJKMI53uS")
                 .roles("ADMIN")
                 .and()
                 .withUser("secondUser")
 //                .password("{noop}pass222")
-                .password("fce5c320888c3fbb25e5f73c345861283a63bc4408466c7b7840784468fab3e708410bf30f9109f8")
+                .password("$2a$10$HcAo/krFqDFHIi2gtYgi9u4M.ANujT8j5kg3Ma2FCpjlh/5k.ps6u")
                 .roles("USER");
         auth.inMemoryAuthentication()
                 .withUser("scott")
 //                .password("{noop}tiger")
-                .password("694343133c5f2615b590507a042e529fba735610e09327e7d5c186033288a0bcfcd2b393c1cd9732")
+                .password("{bcrypt}$2a$10$3R5K18zZUSynPsLeFK.JGehL6d3fYkIc3UtfgJnyEzVq1E4/ggBBK")
                 .roles("CUSTOMER");
     }
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new StandardPasswordEncoder();
-    }
+//    @Bean
+//    public PasswordEncoder passwordEncoder() {
+//        return new BCryptPasswordEncoder();
+//    }
 
 //    @Bean
 //    @Override

@@ -1,16 +1,22 @@
 package com.artarkatesoft.securitystudy.web.controllers;
 
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.LdapShaPasswordEncoder;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.crypto.password.StandardPasswordEncoder;
 import org.springframework.util.DigestUtils;
 
+import java.util.StringTokenizer;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
+@Slf4j
 public class PasswordEncodersTest {
 
     public static final String PASSWORD = "password";
@@ -99,6 +105,58 @@ public class PasswordEncodersTest {
         Stream.of("123", "pass222", "tiger")
                 .forEach(pwd -> System.out.printf("%12s\t| %s\n", pwd, sha256Encoder.encode(pwd)));
         System.out.println("----------------------");
+    }
+
+    @Test
+    void testBCrypt() {
+        //given
+        PasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
+
+        //when
+        String bcryptPassword1 = bCryptPasswordEncoder.encode(PASSWORD);
+        String bcryptPassword2 = bCryptPasswordEncoder.encode(PASSWORD);
+
+        //then
+        System.out.println(bcryptPassword1);
+        System.out.println(bcryptPassword2);
+        assertNotEquals(bcryptPassword1, bcryptPassword2);
+        assertTrue(bCryptPasswordEncoder.matches(PASSWORD, bcryptPassword1));
+        assertTrue(bCryptPasswordEncoder.matches(PASSWORD, bcryptPassword2));
+
+        int defaultStrength = 10;
+        StringTokenizer tokenizer = new StringTokenizer(bcryptPassword1, "$");
+        tokenizer.nextToken();
+        String strengthString = tokenizer.nextToken();
+        assertThat(strengthString).isEqualTo("%d", defaultStrength);
+
+
+        System.out.println("----------------------");
+        System.out.println("getting pwd for config");
+        System.out.println("----------------------");
+        Stream.of("123", "pass222", "tiger")
+                .forEach(pwd -> System.out.printf("%12s\t| %s\n", pwd, bCryptPasswordEncoder.encode(pwd)));
+        System.out.println("----------------------");
+    }
+
+    @Test
+    @Disabled("Just for playing with STRENGTH value")
+    void testBCrypt_playStrength() {
+        //given
+        PasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder(15);
+
+        //when
+        log.info("start");
+        String bcryptPassword1 = bCryptPasswordEncoder.encode(PASSWORD);
+        log.info("1: {}", bcryptPassword1);
+        String bcryptPassword2 = bCryptPasswordEncoder.encode(PASSWORD);
+        log.info("2: {}", bcryptPassword2);
+
+        //then
+        assertNotEquals(bcryptPassword1, bcryptPassword2);
+//        assertTrue(bCryptPasswordEncoder.matches(PASSWORD, bcryptPassword1));
+//        log.info("match 1");
+//        assertTrue(bCryptPasswordEncoder.matches(PASSWORD, bcryptPassword2));
+//        log.info("match 2");
     }
 
 
