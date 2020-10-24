@@ -35,11 +35,17 @@ public class SfgRestHeaderAuthFilter extends AbstractAuthenticationProcessingFil
             logger.debug("Request is to process authentication");
         }
 
-        Authentication authResult = attemptAuthentication(request, response);
-        if (authResult != null)
-            successfulAuthentication(request, response, chain, authResult);
-        else
-            chain.doFilter(request, response);
+        Authentication authResult = null;
+        try {
+            authResult = attemptAuthentication(request, response);
+            if (authResult != null)
+                successfulAuthentication(request, response, chain, authResult);
+            else
+                chain.doFilter(request, response);
+
+        } catch (AuthenticationException e) {
+            unsuccessfulAuthentication(request, response, e);
+        }
     }
 
     @Override
@@ -53,6 +59,21 @@ public class SfgRestHeaderAuthFilter extends AbstractAuthenticationProcessingFil
         }
 
         SecurityContextHolder.getContext().setAuthentication(authResult);
+    }
+
+    @Override
+    protected void unsuccessfulAuthentication(HttpServletRequest request,
+                                              HttpServletResponse response, AuthenticationException failed)
+            throws IOException, ServletException {
+        SecurityContextHolder.clearContext();
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Authentication request failed: " + failed.toString(), failed);
+            logger.debug("Updated SecurityContextHolder to contain null Authentication");
+        }
+
+        response.sendError(HttpStatus.UNAUTHORIZED.value(),
+                HttpStatus.UNAUTHORIZED.getReasonPhrase());
     }
 
     @Override

@@ -1,7 +1,6 @@
 package com.artarkatesoft.securitystudy.web.controllers.api;
 
 import com.artarkatesoft.securitystudy.services.BeerService;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,7 +51,7 @@ class BeerRestControllerIT {
     }
 
     @Test
-    @Disabled("Exception handle - NOT IMPLEMENTED YET")
+//    @Disabled("Exception handle - NOT IMPLEMENTED YET")
     @DisplayName("DELETE beer by ID with WRONG credentials (may be met in LEGACY systems)")
     void deleteById_wrongCredentials() throws Exception {
         //when
