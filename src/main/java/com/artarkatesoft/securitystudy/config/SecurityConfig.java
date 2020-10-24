@@ -1,6 +1,7 @@
 package com.artarkatesoft.securitystudy.config;
 
 import com.artarkatesoft.securitystudy.security.ArtPasswordEncoderFactories;
+import com.artarkatesoft.securitystudy.security.ArtRestHeaderAuthFilter;
 import com.artarkatesoft.securitystudy.security.SfgRestHeaderAuthFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,8 +19,14 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-    public SfgRestHeaderAuthFilter restHeaderAuthFilter(AuthenticationManager manager) {
+    public SfgRestHeaderAuthFilter sfgRestHeaderAuthFilter(AuthenticationManager manager) {
         SfgRestHeaderAuthFilter authFilter = new SfgRestHeaderAuthFilter(new AntPathRequestMatcher("/api/**"));
+        authFilter.setAuthenticationManager(manager);
+        return authFilter;
+    }
+
+    public ArtRestHeaderAuthFilter artRestHeaderAuthFilter(AuthenticationManager manager) {
+        ArtRestHeaderAuthFilter authFilter = new ArtRestHeaderAuthFilter("/api/**");
         authFilter.setAuthenticationManager(manager);
         return authFilter;
     }
@@ -28,7 +35,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
 
         http
-                .addFilterBefore(restHeaderAuthFilter(this.authenticationManager()),
+                .addFilterBefore(artRestHeaderAuthFilter(this.authenticationManager()),
                         UsernamePasswordAuthenticationFilter.class)
                 .csrf().disable();
 
