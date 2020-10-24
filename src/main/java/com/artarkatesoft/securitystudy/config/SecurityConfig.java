@@ -1,7 +1,7 @@
 package com.artarkatesoft.securitystudy.config;
 
 import com.artarkatesoft.securitystudy.security.ArtPasswordEncoderFactories;
-import com.artarkatesoft.securitystudy.security.RestHeaderAuthFilter;
+import com.artarkatesoft.securitystudy.security.SfgRestHeaderAuthFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -18,8 +18,8 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-    public RestHeaderAuthFilter restHeaderAuthFilter(AuthenticationManager manager) {
-        RestHeaderAuthFilter authFilter = new RestHeaderAuthFilter(new AntPathRequestMatcher("/api/**"));
+    public SfgRestHeaderAuthFilter restHeaderAuthFilter(AuthenticationManager manager) {
+        SfgRestHeaderAuthFilter authFilter = new SfgRestHeaderAuthFilter(new AntPathRequestMatcher("/api/**"));
         authFilter.setAuthenticationManager(manager);
         return authFilter;
     }
