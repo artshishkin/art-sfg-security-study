@@ -148,7 +148,8 @@ public class PasswordEncodersTest {
         log.info("start");
         String bcryptPassword1 = bCryptPasswordEncoder.encode(PASSWORD);
         log.info("1: {}", bcryptPassword1);
-        String bcryptPassword2 = bCryptPasswordEncoder.encode(PASSWORD);
+//        String bcryptPassword2 = bCryptPasswordEncoder.encode(PASSWORD);
+        String bcryptPassword2 = bCryptPasswordEncoder.encode("tiger");
         log.info("2: {}", bcryptPassword2);
 
         //then
