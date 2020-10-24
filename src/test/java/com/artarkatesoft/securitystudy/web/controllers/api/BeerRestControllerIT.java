@@ -50,13 +50,25 @@ class BeerRestControllerIT {
 
     @Test
     @DisplayName("When delete beer by ID with WRONG credentials (may be met in LEGACY systems)")
-    void deleteById() throws Exception {
+    void deleteById_fail() throws Exception {
+        //when
+        mockMvc.perform(
+                delete("/api/v1/beer/493410b3-dd0b-4b78-97bf-289f50f6e74f")
+                        .header("Api-Key", "art")
+                        .header("Api-Secret", "1234"))
+                //then
+                .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    @DisplayName("When delete beer by ID with CORRECT credentials (may be met in LEGACY systems)")
+    void deleteById_ok() throws Exception {
         //when
         mockMvc.perform(
                 delete("/api/v1/beer/493410b3-dd0b-4b78-97bf-289f50f6e74f")
                         .header("Api-Key", "art")
                         .header("Api-Secret", "123"))
                 //then
-                .andExpect(status().is4xxClientError());
+                .andExpect(status().isOk());
     }
 }
