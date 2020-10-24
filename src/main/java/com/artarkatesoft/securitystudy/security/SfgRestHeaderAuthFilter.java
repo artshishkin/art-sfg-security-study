@@ -1,6 +1,7 @@
 package com.artarkatesoft.securitystudy.security;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -30,6 +31,12 @@ public class SfgRestHeaderAuthFilter extends AbstractAuthenticationProcessingFil
 
         HttpServletRequest request = (HttpServletRequest) req;
         HttpServletResponse response = (HttpServletResponse) res;
+
+        if (!requiresAuthentication(request, response)) {
+            chain.doFilter(request, response);
+
+            return;
+        }
 
         if (logger.isDebugEnabled()) {
             logger.debug("Request is to process authentication");
