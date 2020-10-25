@@ -51,8 +51,7 @@ class BeerRestControllerIT {
     }
 
     @Test
-//    @Disabled("Exception handle - NOT IMPLEMENTED YET")
-    @DisplayName("DELETE beer by ID with WRONG credentials (may be met in LEGACY systems)")
+    @DisplayName("DELETE beer by ID with WRONG credentials in HEADERS (may be met in LEGACY systems)")
     void deleteById_wrongCredentials() throws Exception {
         //when
         mockMvc.perform(
@@ -74,7 +73,7 @@ class BeerRestControllerIT {
     }
 
     @Test
-    @DisplayName("DELETE beer by ID with CORRECT credentials (may be met in LEGACY systems)")
+    @DisplayName("DELETE beer by ID with CORRECT credentials in HEADERS (may be met in LEGACY systems)")
     void deleteById_ok() throws Exception {
         //when
         mockMvc.perform(
@@ -96,4 +95,54 @@ class BeerRestControllerIT {
                 //then
                 .andExpect(status().is(HttpStatus.NO_CONTENT.value()));
     }
+
+    @Test
+    @DisplayName("DELETE beer by ID with WRONG credentials in PARAMETERS (may be met in LEGACY systems)")
+    void deleteById_wrongCredentialsInParametersUsingURL() throws Exception {
+        //when
+        mockMvc.perform(
+                delete("/api/v1/beer/493410b3-dd0b-4b78-97bf-289f50f6e74f?Api-Key=art&Api-Secret=BLA_BLA_BLA"))
+
+                //then
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("DELETE beer by ID with CORRECT credentials in PARAMETERS (may be met in LEGACY systems)")
+    void deleteById_keyInParametersUsingURL() throws Exception {
+        //when
+        mockMvc.perform(
+                delete("/api/v1/beer/493410b3-dd0b-4b78-97bf-289f50f6e74f?Api-Key=art&Api-Secret=123"))
+
+                //then
+                .andExpect(status().isOk());
+    }
+
+
+    @Test
+    @DisplayName("DELETE beer by ID with WRONG credentials in PARAMETERS (may be met in LEGACY systems)")
+    void deleteById_wrongCredentialsInParameters() throws Exception {
+        //when
+        mockMvc.perform(
+                delete("/api/v1/beer/493410b3-dd0b-4b78-97bf-289f50f6e74f")
+                        .param("Api-Key", "art")
+                        .param("Api-Secret", "BLA_BLA_BLA"))
+
+                //then
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("DELETE beer by ID with CORRECT credentials in PARAMETERS (may be met in LEGACY systems)")
+    void deleteById_keyInParameters() throws Exception {
+        //when
+        mockMvc.perform(
+                delete("/api/v1/beer/493410b3-dd0b-4b78-97bf-289f50f6e74f")
+                        .param("Api-Key", "art")
+                        .param("Api-Secret", "123"))
+                //then
+                .andExpect(status().isOk());
+    }
+
+
 }

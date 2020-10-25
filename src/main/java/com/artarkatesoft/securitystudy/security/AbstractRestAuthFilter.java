@@ -17,8 +17,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @Slf4j
-public class ArtRestHeaderAuthFilter extends AbstractAuthenticationProcessingFilter {
-    public ArtRestHeaderAuthFilter(String defaultFilterProcessesUrl) {
+public abstract class AbstractRestAuthFilter extends AbstractAuthenticationProcessingFilter {
+    public AbstractRestAuthFilter(String defaultFilterProcessesUrl) {
         super(defaultFilterProcessesUrl);
         setAuthenticationSuccessHandler((request, response, authentication) -> {
 
@@ -39,16 +39,11 @@ public class ArtRestHeaderAuthFilter extends AbstractAuthenticationProcessingFil
                 null;
     }
 
-    private String obtainUsername(HttpServletRequest request) {
-        String key = request.getHeader("Api-Key");
-        return key == null ? "" : key;
-    }
+    abstract protected String obtainUsername(HttpServletRequest request);
 
-    private String obtainPassword(HttpServletRequest request) {
-        String secret = request.getHeader("Api-Secret");
-        return secret == null ? "" : secret;
-    }
+    abstract protected String obtainPassword(HttpServletRequest request);
 
+    @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
             throws IOException, ServletException {
 

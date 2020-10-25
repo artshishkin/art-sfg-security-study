@@ -1,7 +1,8 @@
 package com.artarkatesoft.securitystudy.config;
 
 import com.artarkatesoft.securitystudy.security.ArtPasswordEncoderFactories;
-import com.artarkatesoft.securitystudy.security.ArtRestHeaderAuthFilter;
+import com.artarkatesoft.securitystudy.security.RestHeaderAuthFilter;
+import com.artarkatesoft.securitystudy.security.RestUrlAuthFilter;
 import com.artarkatesoft.securitystudy.security.SfgRestHeaderAuthFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,8 +26,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         return authFilter;
     }
 
-    public ArtRestHeaderAuthFilter artRestHeaderAuthFilter(AuthenticationManager manager) {
-        ArtRestHeaderAuthFilter authFilter = new ArtRestHeaderAuthFilter("/api/**");
+    public RestHeaderAuthFilter artRestHeaderAuthFilter(AuthenticationManager manager) {
+        RestHeaderAuthFilter authFilter = new RestHeaderAuthFilter("/api/**");
+        authFilter.setAuthenticationManager(manager);
+        return authFilter;
+    }
+
+    public RestUrlAuthFilter artRestRequestParamAuthFilter(AuthenticationManager manager) {
+        RestUrlAuthFilter authFilter = new RestUrlAuthFilter("/api/**");
         authFilter.setAuthenticationManager(manager);
         return authFilter;
     }
@@ -36,6 +43,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
         http
                 .addFilterBefore(artRestHeaderAuthFilter(this.authenticationManager()),
+                        UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(artRestRequestParamAuthFilter(this.authenticationManager()),
                         UsernamePasswordAuthenticationFilter.class)
                 .csrf().disable();
 
