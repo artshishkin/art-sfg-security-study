@@ -1,12 +1,15 @@
 package com.artarkatesoft.securitystudy.domain.security;
 
-import lombok.Data;
+import lombok.*;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import java.util.Set;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 public class User implements UserDetails {
 
@@ -16,11 +19,16 @@ public class User implements UserDetails {
 
     private String password;
     private String username;
+    @Builder.Default
     private boolean accountNonExpired = true;
+    @Builder.Default
     private boolean accountNonLocked = true;
+    @Builder.Default
     private boolean credentialsNonExpired = true;
+    @Builder.Default
     private boolean enabled = true;
 
+    @Singular
     @ManyToMany(cascade = CascadeType.MERGE)
     @JoinTable(name = "user_authority",
             joinColumns = @JoinColumn(name = "USER_ID", referencedColumnName = "ID"),
