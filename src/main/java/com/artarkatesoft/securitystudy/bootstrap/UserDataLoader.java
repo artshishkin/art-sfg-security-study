@@ -31,7 +31,7 @@ public class UserDataLoader implements CommandLineRunner {
 
     private void loadSecurityData() {
 
-        List<Authority> authorities = Stream.of("ADMIN", "USER", "CUSTOMER")
+        List<Authority> authorities = Stream.of("ROLE_ADMIN", "ROLE_USER", "ROLE_CUSTOMER")
                 .map(authority -> Authority.builder().authority(authority).build())
                 .map(authorityRepository::save)
                 .collect(Collectors.toList());

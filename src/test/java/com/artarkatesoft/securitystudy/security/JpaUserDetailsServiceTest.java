@@ -46,9 +46,9 @@ class JpaUserDetailsServiceTest {
 
     @ParameterizedTest
     @CsvSource({
-            "art,ADMIN",
-            "secondUser,USER",
-            "scott,CUSTOMER"
+            "art,ROLE_ADMIN",
+            "secondUser,ROLE_USER",
+            "scott,ROLE_CUSTOMER"
     })
     void loadByUsernameWhenPresent(String username, String role) {
         //when
