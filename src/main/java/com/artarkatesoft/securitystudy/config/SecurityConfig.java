@@ -59,6 +59,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                                 .antMatchers(HttpMethod.GET, "/api/v1/beer/**").permitAll()
                                 .mvcMatchers(HttpMethod.GET, "/api/v1/beerUpc/{upc}").permitAll()
                                 .mvcMatchers(HttpMethod.DELETE, "/api/v1/beer/**").hasRole("ADMIN")
+                                .mvcMatchers("/breweries/**", "/breweries.html", "/api/v1/breweries").hasRole("CUSTOMER")
                 )
 
                 .authorizeRequests()
