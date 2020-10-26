@@ -4,6 +4,8 @@ import com.artarkatesoft.securitystudy.services.BeerService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -108,6 +110,22 @@ class BeerRestControllerIT {
                                 .with(httpBasic("art", "123")))
                 //then
                 .andExpect(status().is(HttpStatus.NO_CONTENT.value()));
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "secondUser,pass222",
+            "scott,tiger"
+    })
+    @DisplayName("DELETE beer by ID with CORRECT credentials and Basic Auth but NOT Allowed by Authority (not ROLE_ADMIN)")
+    void deleteById_httpBasic_roleUserOrCustomer(String username, String password) throws Exception {
+        //when
+        mockMvc
+                .perform(
+                        delete("/api/v1/beer/493410b3-dd0b-4b78-97bf-289f50f6e74f")
+                                .with(httpBasic(username, password)))
+                //then
+                .andExpect(status().isForbidden());
     }
 
     @Test
