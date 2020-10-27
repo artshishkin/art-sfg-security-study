@@ -19,6 +19,8 @@ public class Role {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
 
+    private String name;
+
     @Singular
     @ManyToMany(cascade = {MERGE, PERSIST}, fetch = EAGER)
     @JoinTable(name = "role_authority",

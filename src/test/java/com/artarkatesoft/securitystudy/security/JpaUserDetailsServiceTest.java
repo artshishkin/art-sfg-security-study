@@ -2,6 +2,7 @@ package com.artarkatesoft.securitystudy.security;
 
 import com.artarkatesoft.securitystudy.bootstrap.UserDataLoader;
 import com.artarkatesoft.securitystudy.repositories.security.AuthorityRepository;
+import com.artarkatesoft.securitystudy.repositories.security.RoleRepository;
 import com.artarkatesoft.securitystudy.repositories.security.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,6 +28,9 @@ class JpaUserDetailsServiceTest {
     @Autowired
     AuthorityRepository authorityRepository;
 
+    @Autowired
+    RoleRepository roleRepository;
+
     UserDataLoader userDataLoader;
 
     @BeforeEach
@@ -41,7 +45,7 @@ class JpaUserDetailsServiceTest {
     }
 
     UserDataLoader userDataLoader() {
-        return new UserDataLoader(authorityRepository, userRepository, passwordEncoder());
+        return new UserDataLoader(authorityRepository, roleRepository, userRepository, passwordEncoder());
     }
 
     @ParameterizedTest
