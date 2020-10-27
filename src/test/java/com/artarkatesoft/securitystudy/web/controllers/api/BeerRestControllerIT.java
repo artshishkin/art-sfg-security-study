@@ -3,6 +3,7 @@ package com.artarkatesoft.securitystudy.web.controllers.api;
 import com.artarkatesoft.securitystudy.bootstrap.DefaultBreweryLoader;
 import com.artarkatesoft.securitystudy.domain.Beer;
 import com.artarkatesoft.securitystudy.repositories.BeerRepository;
+import com.artarkatesoft.securitystudy.web.controllers.BaseIT;
 import com.artarkatesoft.securitystudy.web.model.BeerStyleEnum;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -16,10 +17,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 
 import java.util.Random;
 import java.util.UUID;
@@ -31,24 +28,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-//@WebMvcTest(BeerRestController.class)
 @SpringBootTest
-class BeerRestControllerIT {
-
-    @Autowired
-    WebApplicationContext webApplicationContext;
+class BeerRestControllerIT extends BaseIT {
 
     @Autowired
     BeerRepository beerRepository;
-
-    MockMvc mockMvc;
-
-    @BeforeEach
-    void setUp() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
-                .apply(SecurityMockMvcConfigurers.springSecurity())
-                .build();
-    }
 
     @Test
     void findBeers() throws Exception {

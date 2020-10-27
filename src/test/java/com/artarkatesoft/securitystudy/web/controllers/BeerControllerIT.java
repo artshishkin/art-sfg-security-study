@@ -34,10 +34,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -51,12 +47,8 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-//@WebMvcTest(BeerController.class)
 @SpringBootTest
-class BeerControllerIT {
-
-    @Autowired
-    WebApplicationContext webApplicationContext;
+class BeerControllerIT extends BaseIT{
 
     @Autowired
     BeerRepository beerRepository;
@@ -67,8 +59,6 @@ class BeerControllerIT {
     List<Beer> beerList;
     UUID uuid;
     Beer beer;
-
-    MockMvc mockMvc;
 
     Page<Beer> beers;
     Page<Beer> pagedResponse;
@@ -82,11 +72,6 @@ class BeerControllerIT {
 
         final String id = "493410b3-dd0b-4b78-97bf-289f50f6e74f";
         uuid = UUID.fromString(id);
-
-        mockMvc = MockMvcBuilders
-                .webAppContextSetup(webApplicationContext)
-                .apply(SecurityMockMvcConfigurers.springSecurity())
-                .build();
     }
 
     @ParameterizedTest
