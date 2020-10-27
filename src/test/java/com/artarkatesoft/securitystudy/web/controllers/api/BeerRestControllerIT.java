@@ -9,7 +9,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
@@ -20,7 +23,9 @@ import org.springframework.web.context.WebApplicationContext;
 
 import java.util.Random;
 import java.util.UUID;
+import java.util.stream.Stream;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.anonymous;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -51,7 +56,7 @@ class BeerRestControllerIT {
         mockMvc.perform(get("/api/v1/beer"))
 
                 //then
-                .andExpect(status().isOk());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -63,7 +68,7 @@ class BeerRestControllerIT {
         mockMvc.perform(get("/api/v1/beer/{beerId}", beerId))
 
                 //then
-                .andExpect(status().isOk());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -72,7 +77,50 @@ class BeerRestControllerIT {
         mockMvc.perform(get("/api/v1/beerUpc/{upc}", DefaultBreweryLoader.BEER_3_UPC))
 
                 //then
-                .andExpect(status().isOk());
+                .andExpect(status().isUnauthorized());
+    }
+
+    @ParameterizedTest(name = "#{index} with [{arguments}]")
+    @MethodSource
+    @DisplayName("Only Authenticated users should HAVE access to Beer Rest Endpoint")
+    void findTests(String url, String username, String password, HttpStatus httpStatus) throws Exception {
+        //given
+        Beer beer = beerRepository.findAll().get(0);
+        String urlParameter = url.contains("beerUpc") ? beer.getUpc() : beer.getId().toString();
+
+        //when
+        mockMvc.perform(
+                get(url, urlParameter)
+                        .with(httpBasic(username, password)))
+                //then
+                .andExpect(status().is(httpStatus.value()));
+    }
+
+    static Stream<Arguments> findTests() {
+        return Stream
+                .of("/api/v1/beer", "/api/v1/beer/{beerId}", "/api/v1/beerUpc/{upc}")
+                .flatMap(url -> Stream
+                        .of(
+                                Arguments.of(url, "art", "123", HttpStatus.OK),
+                                Arguments.of(url, "secondUser", "pass222", HttpStatus.OK),
+                                Arguments.of(url, "scott", "tiger", HttpStatus.OK),
+                                Arguments.of(url, "foo", "buzz", HttpStatus.UNAUTHORIZED)
+                        )
+                );
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"/api/v1/beer", "/api/v1/beer/{beerId}","/api/v1/beerUpc/{upc}"})
+    @DisplayName("Anonymous users are not allowed to access Beer Endpoint")
+    void findById_anonymous(String url) throws Exception {
+        //given
+        Beer beer = beerRepository.findAll().get(0);
+        String urlParameter = url.contains("beerUpc") ? beer.getUpc() : beer.getId().toString();
+
+        //when
+        mockMvc.perform(get(url, urlParameter).with(anonymous()))
+                //then
+                .andExpect(status().isUnauthorized());
     }
 
     @DisplayName("Delete tests")

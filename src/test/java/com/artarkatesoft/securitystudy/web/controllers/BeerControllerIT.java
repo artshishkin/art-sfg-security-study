@@ -24,14 +24,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpHeaders;
-import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -42,8 +44,8 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.anonymous;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -56,17 +58,16 @@ class BeerControllerIT {
     @Autowired
     WebApplicationContext webApplicationContext;
 
-    @MockBean
+    @Autowired
     BeerRepository beerRepository;
 
-    @MockBean
+    @Autowired
     BeerInventoryRepository beerInventoryRepository;
 
     List<Beer> beerList;
     UUID uuid;
     Beer beer;
 
-    //    @Autowired
     MockMvc mockMvc;
 
     Page<Beer> beers;
@@ -102,16 +103,6 @@ class BeerControllerIT {
                 .andExpect(status().isOk())
                 .andExpect(view().name("beers/createBeer"))
                 .andExpect(model().attributeExists("beer"));
-    }
-
-    @WithMockUser(username = "WTF")
-    @Test
-    void findBeers() throws Exception {
-        mockMvc.perform(get("/beers/find"))
-                .andExpect(status().isOk())
-                .andExpect(view().name("beers/findBeers"))
-                .andExpect(model().attributeExists("beer"));
-        verifyNoInteractions(beerRepository);
     }
 
     @Test
@@ -161,13 +152,47 @@ class BeerControllerIT {
                 .andExpect(model().attributeExists("beer"));
     }
 
-    @Test
-    @DisplayName("Accessing Find Beer Endpoint when permitAll")
-    void findBeers_givenPermitAll() throws Exception {
-        mockMvc.perform(get("/beers/find").with(anonymous()))
-                .andExpect(status().isOk())
-                .andExpect(view().name("beers/findBeers"))
-                .andExpect(model().attributeExists("beer"));
+    @ParameterizedTest(name = "#{index} with [{arguments}]")
+    @MethodSource
+    @DisplayName("Only Authenticated users should HAVE access to BEERS Endpoint")
+    void findTests(String url, String username, String password, HttpStatus httpStatus) throws Exception {
+        //given
+        Beer beer = beerRepository.findAll().get(0);
+        String urlParameter = beer.getId().toString();
+
+        //when
+        mockMvc.perform(
+                get(url, urlParameter)
+                        .with(httpBasic(username, password)))
+                //then
+                .andExpect(status().is(httpStatus.value()));
+    }
+
+    static Stream<Arguments> findTests() {
+        return Stream
+                .of("/beers/find", "/beers", "/beers/{beerId}","/beers/new","/beers/{beerId}/edit")
+                .flatMap(url -> Stream
+                        .of(
+                                Arguments.of(url, "art", "123", HttpStatus.OK),
+                                Arguments.of(url, "secondUser", "pass222", HttpStatus.OK),
+                                Arguments.of(url, "scott", "tiger", HttpStatus.OK),
+                                Arguments.of(url, "foo", "buzz", HttpStatus.UNAUTHORIZED)
+                        )
+                );
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"/beers/find", "/beers", "/beers/{beerId}","/beers/new","/beers/{beerId}/edit"})
+    @DisplayName("Anonymous users are not allowed to access Beer Endpoint")
+    void findById_anonymous(String url) throws Exception {
+        //given
+        Beer beer = beerRepository.findAll().get(0);
+        String urlParameter =  beer.getId().toString();
+
+        //when
+        mockMvc.perform(get(url, urlParameter).with(anonymous()))
+                //then
+                .andExpect(status().isUnauthorized());
     }
 
 
