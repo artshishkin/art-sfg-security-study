@@ -22,5 +22,5 @@ public class Authority implements GrantedAuthority {
     @ManyToMany(mappedBy = "authorities")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    private Set<User> users;
+    private Set<Role> roles;
 }

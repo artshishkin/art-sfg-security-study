@@ -4,7 +4,13 @@ import lombok.*;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
+import java.util.Collection;
 import java.util.Set;
+import java.util.stream.Collectors;
+
+import static javax.persistence.CascadeType.MERGE;
+import static javax.persistence.CascadeType.PERSIST;
+import static javax.persistence.FetchType.EAGER;
 
 @Data
 @NoArgsConstructor
@@ -28,10 +34,21 @@ public class User implements UserDetails {
     @Builder.Default
     private boolean enabled = true;
 
+//    @Transient
+//    private Set<Authority> authorities;
+
     @Singular
-    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
-    @JoinTable(name = "user_authority",
+    @ManyToMany(cascade = {MERGE,PERSIST}, fetch = EAGER)
+    @JoinTable(name = "user_role",
             joinColumns = @JoinColumn(name = "USER_ID", referencedColumnName = "ID"),
-            inverseJoinColumns = @JoinColumn(name = "AUTHORITY_ID", referencedColumnName = "ID"))
-    private Set<Authority> authorities;
+            inverseJoinColumns = @JoinColumn(name = "ROLE_ID", referencedColumnName = "ID"))
+    private Set<Role> roles;
+
+    @Override
+    public Set<Authority> getAuthorities() {
+        return roles.stream()
+                .map(Role::getAuthorities)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toSet());
+    }
 }
