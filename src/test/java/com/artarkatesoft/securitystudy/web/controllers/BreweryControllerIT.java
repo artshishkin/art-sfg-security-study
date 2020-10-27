@@ -50,7 +50,7 @@ class BreweryControllerIT {
                 .of("/breweries", "/breweries/index", "/breweries/index.html", "/breweries.html", "/api/v1/breweries")
                 .flatMap(url -> Stream
                         .of(
-                                Arguments.of(url, "art", "123", HttpStatus.FORBIDDEN),
+                                Arguments.of(url, "art", "123", HttpStatus.OK),
                                 Arguments.of(url, "secondUser", "pass222", HttpStatus.FORBIDDEN),
                                 Arguments.of(url, "scott", "tiger", HttpStatus.OK),
                                 Arguments.of(url, "foo", "buzz", HttpStatus.UNAUTHORIZED)
