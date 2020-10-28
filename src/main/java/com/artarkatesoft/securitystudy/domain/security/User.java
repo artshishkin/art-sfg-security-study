@@ -1,6 +1,7 @@
 package com.artarkatesoft.securitystudy.domain.security;
 
 import lombok.*;
+import org.springframework.security.core.CredentialsContainer;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
@@ -17,7 +18,7 @@ import static javax.persistence.FetchType.EAGER;
 @AllArgsConstructor
 @Builder
 @Entity
-public class User implements UserDetails {
+public class User implements UserDetails, CredentialsContainer {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -38,7 +39,7 @@ public class User implements UserDetails {
 //    private Set<Authority> authorities;
 
     @Singular
-    @ManyToMany(cascade = {MERGE,PERSIST}, fetch = EAGER)
+    @ManyToMany(cascade = {MERGE, PERSIST}, fetch = EAGER)
     @JoinTable(name = "user_role",
             joinColumns = @JoinColumn(name = "USER_ID", referencedColumnName = "ID"),
             inverseJoinColumns = @JoinColumn(name = "ROLE_ID", referencedColumnName = "ID"))
@@ -50,5 +51,10 @@ public class User implements UserDetails {
                 .map(Role::getAuthorities)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toSet());
+    }
+
+    @Override
+    public void eraseCredentials() {
+        password = null;
     }
 }
