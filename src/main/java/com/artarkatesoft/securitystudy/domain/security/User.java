@@ -1,5 +1,6 @@
 package com.artarkatesoft.securitystudy.domain.security;
 
+import com.artarkatesoft.securitystudy.domain.Customer;
 import lombok.*;
 import org.springframework.security.core.CredentialsContainer;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -37,6 +38,9 @@ public class User implements UserDetails, CredentialsContainer {
 
 //    @Transient
 //    private Set<Authority> authorities;
+
+    @ManyToOne(fetch = EAGER)
+    private Customer customer;
 
     @Singular
     @ManyToMany(cascade = {MERGE, PERSIST}, fetch = EAGER)
