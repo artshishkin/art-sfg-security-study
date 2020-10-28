@@ -10,6 +10,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -50,18 +51,32 @@ class JpaUserDetailsServiceTest {
 
     @ParameterizedTest
     @CsvSource({
-            "art,ROLE_ADMIN",
-            "secondUser,ROLE_USER",
-            "scott,ROLE_CUSTOMER"
+            "art,beer.create,true",
+            "art,beer.delete,true",
+            "art,customer.create,true",
+            "art,brewery.create,true",
+            "secondUser,beer.read,true",
+            "secondUser,beer.update,false",
+            "secondUser,beer.create,false",
+            "secondUser,brewery.delete,false",
+            "secondUser,customer.delete,false",
+            "scott,beer.read,true",
+            "scott,beer.update,false",
+            "scott,beer.delete,false",
+            "scott,brewery.update,false",
+            "scott,brewery.delete,false"
     })
-    void loadByUsernameWhenPresent(String username, String role) {
+    void loadByUsernameWhenPresent(String username, String permission, boolean isAllowed) {
         //when
         UserDetails user = jpaUserDetailsService.loadUserByUsername(username);
 
         //then
         assertThat(user).isNotNull();
         assertThat(user.getAuthorities()).isNotEmpty();
-        assertThat(user.getAuthorities().iterator().next().getAuthority()).isEqualTo(role);
+        if (isAllowed)
+            assertThat(user.getAuthorities().stream().map(GrantedAuthority::getAuthority)).contains(permission);
+        else
+            assertThat(user.getAuthorities().stream().map(GrantedAuthority::getAuthority)).doesNotContain(permission);
     }
 
     @Test
