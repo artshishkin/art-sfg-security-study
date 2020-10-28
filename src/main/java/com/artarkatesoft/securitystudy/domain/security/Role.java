@@ -6,7 +6,6 @@ import javax.persistence.*;
 import java.util.Set;
 
 import static javax.persistence.CascadeType.MERGE;
-import static javax.persistence.CascadeType.PERSIST;
 import static javax.persistence.FetchType.EAGER;
 
 @Data
@@ -22,7 +21,7 @@ public class Role {
     private String name;
 
     @Singular
-    @ManyToMany(cascade = {MERGE, PERSIST}, fetch = EAGER)
+    @ManyToMany(cascade = {MERGE}, fetch = EAGER)
     @JoinTable(name = "role_authority",
             joinColumns = @JoinColumn(name = "ROLE_ID", referencedColumnName = "ID"),
             inverseJoinColumns = @JoinColumn(name = "AUTHORITY_ID", referencedColumnName = "ID"))

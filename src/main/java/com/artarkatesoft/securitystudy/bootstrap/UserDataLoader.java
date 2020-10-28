@@ -9,6 +9,7 @@ import com.artarkatesoft.securitystudy.repositories.security.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -20,6 +21,7 @@ import java.util.stream.Stream;
 @Slf4j
 @RequiredArgsConstructor
 @Component
+@Order(9)
 public class UserDataLoader implements CommandLineRunner {
 
     private final AuthorityRepository authorityRepository;
@@ -43,26 +45,26 @@ public class UserDataLoader implements CommandLineRunner {
                 "order.create", "order.read", "order.update", "order.delete"
         )
                 .map(permission -> Authority.builder().authority(permission).build())
-//                .map(authorityRepository::save)
+                .map(authorityRepository::save)
                 .collect(Collectors.toMap(Authority::getAuthority, authority -> authority));
 
         Map<String, Authority> customersBeerOrderAuth = Stream.of(
                 "customer.order.create", "customer.order.read", "customer.order.update", "customer.order.delete"
         )
                 .map(permission -> Authority.builder().authority(permission).build())
-//                .map(authorityRepository::save)
+                .map(authorityRepository::save)
                 .collect(Collectors.toMap(Authority::getAuthority, authority -> authority));
 
-        Role adminRole = Role.builder().name("ADMIN").authorities(auth.values()).build();
-        Role customerRole = Role.builder().name("CUSTOMER")
+        Role adminRole = roleRepository.save(Role.builder().name("ADMIN").authorities(auth.values()).build());
+        Role customerRole = roleRepository.save(Role.builder().name("CUSTOMER")
                 .authority(auth.get("beer.read"))
                 .authority(auth.get("customer.read"))
                 .authority(auth.get("brewery.read"))
                 .authorities(customersBeerOrderAuth.values())
-                .build();
-        Role userRole = Role.builder().name("USER")
+                .build());
+        Role userRole = roleRepository.save(Role.builder().name("USER")
                 .authority(auth.get("beer.read"))
-                .build();
+                .build());
 
         User user1 = User.builder()
                 .username("art")

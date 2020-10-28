@@ -11,7 +11,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static javax.persistence.CascadeType.MERGE;
-import static javax.persistence.CascadeType.PERSIST;
 import static javax.persistence.FetchType.EAGER;
 
 @Data
@@ -43,7 +42,7 @@ public class User implements UserDetails, CredentialsContainer {
     private Customer customer;
 
     @Singular
-    @ManyToMany(cascade = {MERGE, PERSIST}, fetch = EAGER)
+    @ManyToMany(cascade = {MERGE}, fetch = EAGER)
     @JoinTable(name = "user_role",
             joinColumns = @JoinColumn(name = "USER_ID", referencedColumnName = "ID"),
             inverseJoinColumns = @JoinColumn(name = "ROLE_ID", referencedColumnName = "ID"))
