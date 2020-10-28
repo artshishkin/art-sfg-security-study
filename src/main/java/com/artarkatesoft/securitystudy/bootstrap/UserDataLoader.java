@@ -13,7 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -34,40 +34,24 @@ public class UserDataLoader implements CommandLineRunner {
     }
 
     private void loadSecurityData() {
-        //Beer auth
-        List<Authority> authorities = Stream.of("beer.create", "beer.read", "beer.update", "beer.delete")
+        Map<String, Authority> auth = Stream.of(
+                "beer.create", "beer.read", "beer.update", "beer.delete",
+                "customer.create", "customer.read", "customer.update", "customer.delete",
+                "brewery.create", "brewery.read", "brewery.update", "brewery.delete"
+        )
                 .map(permission -> Authority.builder().authority(permission).build())
 //                .map(authorityRepository::save)
-                .collect(Collectors.toList());
+                .collect(Collectors.toMap(Authority::getAuthority, authority -> authority));
 
-        Authority createBeer = authorities.get(0);
-        Authority readBeer = authorities.get(1);
-        Authority updateBeer = authorities.get(2);
-        Authority deleteBeer = authorities.get(3);
-
-
-//        Role adminRole = roleRepository.save(
-//                Role.builder().name("ADMIN").authorities(Set.of(createBeer, readBeer, updateBeer, deleteBeer)).build());
-//        Role customerRole = roleRepository.save(
-//                Role.builder().name("CUSTOMER").authority(readBeer).build());
-//        Role userRole = roleRepository.save(
-//                Role.builder().name("USER").authority(readBeer).build());
-        Role adminRole = Role.builder().name("ADMIN").authorities(Set.of(createBeer, readBeer, updateBeer, deleteBeer)).build();
-        Role customerRole = Role.builder().name("CUSTOMER").authority(readBeer).build();
-        Role userRole = Role.builder().name("USER").authority(readBeer).build();
-
-//        Role adminRole = roleRepository.save(Role.builder().name("ADMIN").build());
-//        Role customerRole = roleRepository.save(Role.builder().name("CUSTOMER").build());
-//        Role userRole = roleRepository.save(Role.builder().name("USER").build());
-//
-//        adminRole.setAuthorities(Set.of(createBeer, readBeer, updateBeer, deleteBeer));
-//        customerRole.setAuthorities(Set.of(readBeer));
-//        userRole.setAuthorities(Set.of(readBeer));
-
-//        roleRepository.saveAll(Arrays.asList(adminRole, customerRole, userRole));
-//        adminRole = roleRepository.save(adminRole);
-//        customerRole = roleRepository.save(customerRole);
-//        userRole = roleRepository.save(userRole);
+        Role adminRole = Role.builder().name("ADMIN").authorities(auth.values()).build();
+        Role customerRole = Role.builder().name("CUSTOMER")
+                .authority(auth.get("beer.read"))
+                .authority(auth.get("customer.read"))
+                .authority(auth.get("brewery.read"))
+                .build();
+        Role userRole = Role.builder().name("USER")
+                .authority(auth.get("beer.read"))
+                .build();
 
         User user1 = User.builder()
                 .username("art")
@@ -85,9 +69,6 @@ public class UserDataLoader implements CommandLineRunner {
                 .role(customerRole)
                 .build();
 
-//        userRepository.save(user1);
-//        userRepository.save(user2);
-//        userRepository.save(user3);
         userRepository.saveAll(List.of(user1, user2, user3));
 
         log.debug("Users loaded: {}", userRepository.count());
