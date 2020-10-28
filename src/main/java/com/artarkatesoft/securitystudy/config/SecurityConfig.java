@@ -6,7 +6,6 @@ import com.artarkatesoft.securitystudy.security.RestUrlAuthFilter;
 import com.artarkatesoft.securitystudy.security.SfgRestHeaderAuthFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -59,10 +58,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                                 .antMatchers("/", "/webjars/**", "/resources/**").permitAll()
                                 .antMatchers("/beers/find", "/beers/**")
                                     .hasAnyRole("ADMIN","USER","CUSTOMER")
-                                .antMatchers(HttpMethod.GET, "/api/v1/beer/**")
-                                    .hasAnyRole("ADMIN","USER","CUSTOMER")
-                                .mvcMatchers(HttpMethod.GET, "/api/v1/beerUpc/{upc}")
-                                    .authenticated()
                                 .mvcMatchers("/breweries/**", "/breweries.html", "/api/v1/breweries")
                                     .hasAnyRole("ADMIN", "CUSTOMER")
                 )
