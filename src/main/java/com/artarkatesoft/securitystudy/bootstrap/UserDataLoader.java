@@ -37,7 +37,17 @@ public class UserDataLoader implements CommandLineRunner {
         Map<String, Authority> auth = Stream.of(
                 "beer.create", "beer.read", "beer.update", "beer.delete",
                 "customer.create", "customer.read", "customer.update", "customer.delete",
-                "brewery.create", "brewery.read", "brewery.update", "brewery.delete"
+                //customer brewery
+                "brewery.create", "brewery.read", "brewery.update", "brewery.delete",
+                //beer order
+                "order.create", "order.read", "order.update", "order.delete"
+        )
+                .map(permission -> Authority.builder().authority(permission).build())
+//                .map(authorityRepository::save)
+                .collect(Collectors.toMap(Authority::getAuthority, authority -> authority));
+
+        Map<String, Authority> customersBeerOrderAuth = Stream.of(
+                "customer.order.create", "customer.order.read", "customer.order.update", "customer.order.delete"
         )
                 .map(permission -> Authority.builder().authority(permission).build())
 //                .map(authorityRepository::save)
@@ -48,6 +58,7 @@ public class UserDataLoader implements CommandLineRunner {
                 .authority(auth.get("beer.read"))
                 .authority(auth.get("customer.read"))
                 .authority(auth.get("brewery.read"))
+                .authorities(customersBeerOrderAuth.values())
                 .build();
         Role userRole = Role.builder().name("USER")
                 .authority(auth.get("beer.read"))
