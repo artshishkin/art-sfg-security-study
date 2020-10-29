@@ -15,8 +15,7 @@ import org.springframework.test.annotation.Rollback;
 
 import java.util.stream.Stream;
 
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.anonymous;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -88,6 +87,7 @@ class CustomerControllerIT extends BaseIT {
             //when
             mockMvc.perform(
                     post(url, urlParameter)
+                            .with(csrf())
                             .param("customerName", "Foo Customer")
                             .with("".equals(username) ? anonymous() : httpBasic(username, password)))
                     //then
