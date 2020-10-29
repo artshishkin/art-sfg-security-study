@@ -9,6 +9,7 @@ import com.artarkatesoft.securitystudy.web.controllers.BaseIT;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -24,6 +25,7 @@ import java.util.stream.Stream;
 
 import static com.artarkatesoft.securitystudy.bootstrap.DefaultBreweryLoader.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -60,8 +62,8 @@ class BeerOrderControllerV2IT extends BaseIT {
 
     static Stream<Arguments> urlTemplateStream() {
         return Stream.of(
-                Arguments.of(HttpMethod.GET, API_ROOT)
-//                Arguments.of(HttpMethod.GET, API_ROOT + "/orders/{orderId}"),
+                Arguments.of(HttpMethod.GET, API_ROOT),
+                Arguments.of(HttpMethod.GET, API_ROOT + "/{orderId}")
 //                Arguments.of(HttpMethod.PUT, API_ROOT + "/orders/{orderId}/pickup")
         );
     }
@@ -90,6 +92,7 @@ class BeerOrderControllerV2IT extends BaseIT {
     @MethodSource("urlTemplateStream")
     @DisplayName("Admin user should have access to All Order List and Order by Id")
     void getOrPut_OrdersOrByIdUserAdmin(HttpMethod httpMethod, String endpointUrlTemplate) throws Exception {
+        //given
         BeerOrder beerOrder = stPeteCustomer.getBeerOrders().stream().findFirst().orElseThrow();
         UUID testBeerOrderId = beerOrder.getId();
         //when
@@ -107,6 +110,7 @@ class BeerOrderControllerV2IT extends BaseIT {
     @MethodSource("urlTemplateStream")
     @DisplayName("Customer user should have access ONLY to OWN Order List and Order by Id")
     void getOrPut_OrdersOrByIdUserAuthCustomer(HttpMethod httpMethod, String endpointUrlTemplate) throws Exception {
+        //given
         BeerOrder beerOrder = stPeteCustomer.getBeerOrders().stream().findFirst().orElseThrow();
         UUID testBeerOrderId = beerOrder.getId();
         //when
@@ -118,20 +122,33 @@ class BeerOrderControllerV2IT extends BaseIT {
                 .andExpect(status().is2xxSuccessful());
     }
 
+    @Test
+    @WithUserDetails(KEY_WEST_USER)
+    @DisplayName("Customer user should have access ONLY to OWN Order List")
+    void getOrdersAuthCustomerKeyWest() throws Exception {
+        //when
+        mockMvc
+                .perform(
+                        get(API_ROOT)
+                                .accept(APPLICATION_JSON))
+                //then
+                .andExpect(status().isOk());
+    }
+
+    @Test
     @Transactional
     @WithUserDetails(KEY_WEST_USER)
-    @ParameterizedTest
-    @MethodSource("urlTemplateStream")
-    @DisplayName("Customer user should have access ONLY to OWN Order List and Order by Id")
-    void getOrPut_OrdersOrByIdUserAuthCustomer2(HttpMethod httpMethod, String endpointUrlTemplate) throws Exception {
+    @DisplayName("Customer user should NOT have access to OTHER Customer's Order")
+    void getOrdersByIdUserNotAuthCustomer() throws Exception {
+        //given
         BeerOrder beerOrder = stPeteCustomer.getBeerOrders().stream().findFirst().orElseThrow();
         UUID testBeerOrderId = beerOrder.getId();
         //when
         mockMvc
                 .perform(
-                        request(httpMethod, endpointUrlTemplate, testBeerOrderId)
+                        get(API_ROOT + "/{orderId}", testBeerOrderId)
                                 .accept(APPLICATION_JSON))
                 //then
-                .andExpect(status().isOk());
+                .andExpect(status().isNotFound());
     }
 }

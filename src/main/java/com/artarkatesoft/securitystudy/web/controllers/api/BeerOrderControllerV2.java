@@ -6,15 +6,19 @@ import com.artarkatesoft.securitystudy.services.BeerOrderService;
 import com.artarkatesoft.securitystudy.web.model.BeerOrderDto;
 import com.artarkatesoft.securitystudy.web.model.BeerOrderPagedList;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.UUID;
 
 /**
  * Beer Order Controller
  */
+@Slf4j
 @RequestMapping("/api/v2/orders")
 @RestController
 @RequiredArgsConstructor
@@ -47,7 +51,11 @@ public class BeerOrderControllerV2 {
     @BeerOrderReadPermissionV2
     @GetMapping("{orderId}")
     public BeerOrderDto getOrder(@PathVariable("orderId") UUID orderId) {
-        throw new RuntimeException("Not implemented yet");
-//        return beerOrderService.getOrderById(customerId, orderId);
+        BeerOrderDto beerOrderDto = beerOrderService.getOrderById(orderId);
+        if (beerOrderDto == null)
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Order Not Found");
+
+        log.debug("Found order: {}", beerOrderDto);
+        return beerOrderDto;
     }
 }
