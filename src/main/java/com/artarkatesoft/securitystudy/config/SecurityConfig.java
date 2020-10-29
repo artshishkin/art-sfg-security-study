@@ -25,7 +25,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 //    JpaUserDetailsService jpaUserDetailsService;
 
     //needed to use with Spring Data JPA SpEL
-    public SecurityEvaluationContextExtension securityEvaluationContextExtension(){
+    public SecurityEvaluationContextExtension securityEvaluationContextExtension() {
         return new SecurityEvaluationContextExtension();
     }
 
@@ -55,7 +55,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(artRestRequestParamAuthFilter(this.authenticationManager()),
                         UsernamePasswordAuthenticationFilter.class)
-                .csrf().disable();
+                .csrf().ignoringAntMatchers("/h2-console/**", "/api/**");
 
         http
                 .authorizeRequests(authorize ->
