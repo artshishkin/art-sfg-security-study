@@ -42,14 +42,15 @@ public class UserDataLoader implements CommandLineRunner {
                 //customer brewery
                 "brewery.create", "brewery.read", "brewery.update", "brewery.delete",
                 //beer order
-                "order.create", "order.read", "order.update", "order.delete"
+                "order.create", "order.read", "order.update", "order.delete", "order.pickup"
         )
                 .map(permission -> Authority.builder().authority(permission).build())
                 .map(authorityRepository::save)
                 .collect(Collectors.toMap(Authority::getAuthority, authority -> authority));
 
         Map<String, Authority> customersBeerOrderAuth = Stream.of(
-                "customer.order.create", "customer.order.read", "customer.order.update", "customer.order.delete"
+                "customer.order.create", "customer.order.read", "customer.order.update",
+                "customer.order.delete", "customer.order.pickup"
         )
                 .map(permission -> Authority.builder().authority(permission).build())
                 .map(authorityRepository::save)

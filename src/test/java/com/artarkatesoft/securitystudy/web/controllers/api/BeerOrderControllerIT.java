@@ -10,14 +10,15 @@ import com.artarkatesoft.securitystudy.web.model.BeerOrderDto;
 import com.artarkatesoft.securitystudy.web.model.BeerOrderLineDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.test.context.support.WithUserDetails;
 
 import javax.transaction.Transactional;
@@ -28,8 +29,7 @@ import java.util.stream.Stream;
 
 import static com.artarkatesoft.securitystudy.bootstrap.DefaultBreweryLoader.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -136,8 +136,9 @@ class BeerOrderControllerIT extends BaseIT {
 
     static Stream<Arguments> urlTemplateStream() {
         return Stream.of(
-                Arguments.of(API_ROOT + "/orders"),
-                Arguments.of(API_ROOT + "/orders/{orderId}")
+                Arguments.of(HttpMethod.GET, API_ROOT + "/orders"),
+                Arguments.of(HttpMethod.GET, API_ROOT + "/orders/{orderId}"),
+                Arguments.of(HttpMethod.PUT, API_ROOT + "/orders/{orderId}/pickup")
         );
     }
 
@@ -145,13 +146,15 @@ class BeerOrderControllerIT extends BaseIT {
     @ParameterizedTest
     @MethodSource("urlTemplateStream")
     @DisplayName("Not authenticated user should NOT have access to All Order List and Order by Id")
-    void getOrdersOrByIdNotAuth(String endpointUrlTemplate) throws Exception {
+    void getOrPut_OrdersOrByIdNotAuth(HttpMethod httpMethod, String endpointUrlTemplate) throws Exception {
+        //given
         BeerOrder beerOrder = stPeteCustomer.getBeerOrders().stream().findFirst().orElseThrow();
         UUID testBeerOrderId = beerOrder.getId();
+
         //when
         mockMvc
                 .perform(
-                        get(endpointUrlTemplate, stPeteCustomer.getId(), testBeerOrderId)
+                        request(httpMethod, endpointUrlTemplate, stPeteCustomer.getId(), testBeerOrderId)
                                 .accept(APPLICATION_JSON))
                 //then
                 .andExpect(status().isUnauthorized());
@@ -162,16 +165,16 @@ class BeerOrderControllerIT extends BaseIT {
     @ParameterizedTest
     @MethodSource("urlTemplateStream")
     @DisplayName("Admin user should have access to All Order List and Order by Id")
-    void getOrdersOrByIdUserAdmin(String endpointUrlTemplate) throws Exception {
+    void getOrPut_OrdersOrByIdUserAdmin(HttpMethod httpMethod, String endpointUrlTemplate) throws Exception {
         BeerOrder beerOrder = stPeteCustomer.getBeerOrders().stream().findFirst().orElseThrow();
         UUID testBeerOrderId = beerOrder.getId();
         //when
         mockMvc
                 .perform(
-                        get(endpointUrlTemplate, stPeteCustomer.getId(), testBeerOrderId)
+                        request(httpMethod, endpointUrlTemplate, stPeteCustomer.getId(), testBeerOrderId)
                                 .accept(APPLICATION_JSON))
                 //then
-                .andExpect(status().isOk());
+                .andExpect(status().is2xxSuccessful());
     }
 
     @Transactional
@@ -179,16 +182,16 @@ class BeerOrderControllerIT extends BaseIT {
     @ParameterizedTest
     @MethodSource("urlTemplateStream")
     @DisplayName("Customer user should have access ONLY to OWN Order List and Order by Id")
-    void getOrdersOrByIdUserAuthCustomer(String endpointUrlTemplate) throws Exception {
+    void getOrPut_OrdersOrByIdUserAuthCustomer(HttpMethod httpMethod, String endpointUrlTemplate) throws Exception {
         BeerOrder beerOrder = stPeteCustomer.getBeerOrders().stream().findFirst().orElseThrow();
         UUID testBeerOrderId = beerOrder.getId();
         //when
         mockMvc
                 .perform(
-                        get(endpointUrlTemplate, stPeteCustomer.getId(), testBeerOrderId)
+                        request(httpMethod, endpointUrlTemplate, stPeteCustomer.getId(), testBeerOrderId)
                                 .accept(APPLICATION_JSON))
                 //then
-                .andExpect(status().isOk());
+                .andExpect(status().is2xxSuccessful());
     }
 
     @Transactional
@@ -196,36 +199,79 @@ class BeerOrderControllerIT extends BaseIT {
     @ParameterizedTest
     @MethodSource("urlTemplateStream")
     @DisplayName("Customer user should NOT have access to ANOTHER CUSTOMERS' Order List and Order by Id")
-    void getOrdersOrByIdUserNotAuthCustomer(String endpointUrlTemplate) throws Exception {
+    void getOrPut_OrdersOrByIdUserNotAuthCustomer(HttpMethod httpMethod, String endpointUrlTemplate) throws Exception {
         BeerOrder beerOrder = stPeteCustomer.getBeerOrders().stream().findFirst().orElseThrow();
         UUID testBeerOrderId = beerOrder.getId();
         //when
         mockMvc
                 .perform(
-                        get(endpointUrlTemplate, stPeteCustomer.getId(), testBeerOrderId)
+                        request(httpMethod, endpointUrlTemplate, stPeteCustomer.getId(), testBeerOrderId)
                                 .accept(APPLICATION_JSON))
                 //then
                 .andExpect(status().isForbidden());
     }
 
-    @Test
-    @Disabled("Not implemented yet")
-    void pickupOrderNotAuth() {
+    @Transactional
+    @ParameterizedTest
+    @ValueSource(strings = API_ROOT + "/orders/{orderId}/pickup")
+    void pickupOrderNotAuth(String endpointUrlTemplate) throws Exception {
+        BeerOrder beerOrder = stPeteCustomer.getBeerOrders().stream().findFirst().orElseThrow();
+        UUID testBeerOrderId = beerOrder.getId();
+        //when
+        mockMvc
+                .perform(
+                        put(endpointUrlTemplate, stPeteCustomer.getId(), testBeerOrderId)
+                                .accept(APPLICATION_JSON))
+                //then
+                .andExpect(status().isUnauthorized());
     }
 
-    @Test
-    @Disabled("Not implemented yet")
-    void pickupOrderUserAdmin() {
+    @WithUserDetails("art")
+    @Transactional
+    @ParameterizedTest
+    @ValueSource(strings = API_ROOT + "/orders/{orderId}/pickup")
+    void pickupOrderUserAdmin(String endpointUrlTemplate) throws Exception {
+        BeerOrder beerOrder = stPeteCustomer.getBeerOrders().stream().findFirst().orElseThrow();
+        UUID testBeerOrderId = beerOrder.getId();
+        //when
+        mockMvc
+                .perform(
+                        put(endpointUrlTemplate, stPeteCustomer.getId(), testBeerOrderId)
+                                .accept(APPLICATION_JSON))
+                //then
+                .andExpect(status().isNoContent());
     }
 
-    @Test
-    @Disabled("Not implemented yet")
-    void pickupOrderUserAuthCustomer() {
+    @WithUserDetails(ST_PETE_USER)
+    @Transactional
+    @ParameterizedTest
+    @ValueSource(strings = API_ROOT + "/orders/{orderId}/pickup")
+    void pickupOrderUserAuthCustomer(String endpointUrlTemplate) throws Exception {
+        BeerOrder beerOrder = stPeteCustomer.getBeerOrders().stream().findFirst().orElseThrow();
+        UUID testBeerOrderId = beerOrder.getId();
+        //when
+        mockMvc
+                .perform(
+                        put(endpointUrlTemplate, stPeteCustomer.getId(), testBeerOrderId)
+                                .accept(APPLICATION_JSON))
+                //then
+                .andExpect(status().isNoContent());
     }
 
-    @Test
-    @Disabled("Not implemented yet")
-    void pickupOrderUserNOTAuthCustomer() {
+    @WithUserDetails(KEY_WEST_USER)
+    @Transactional
+    @ParameterizedTest
+    @ValueSource(strings = API_ROOT + "/orders/{orderId}/pickup")
+    void pickupOrderUserNOTAuthCustomer(String endpointUrlTemplate) throws Exception {
+        BeerOrder beerOrder = stPeteCustomer.getBeerOrders().stream().findFirst().orElseThrow();
+        UUID testBeerOrderId = beerOrder.getId();
+        //when
+        mockMvc
+                .perform(
+                        put(endpointUrlTemplate, stPeteCustomer.getId(), testBeerOrderId)
+                                .accept(APPLICATION_JSON))
+                //then
+                .andExpect(status().isForbidden());
     }
 
     private BeerOrderDto buildOrderDto(Customer customer, UUID beerId) {

@@ -18,6 +18,7 @@
 package com.artarkatesoft.securitystudy.web.controllers.api;
 
 import com.artarkatesoft.securitystudy.security.perms.BeerOrderCreatePermission;
+import com.artarkatesoft.securitystudy.security.perms.BeerOrderPickupPermission;
 import com.artarkatesoft.securitystudy.security.perms.BeerOrderReadPermission;
 import com.artarkatesoft.securitystudy.services.BeerOrderService;
 import com.artarkatesoft.securitystudy.web.model.BeerOrderDto;
@@ -74,6 +75,7 @@ public class BeerOrderController {
         return beerOrderService.getOrderById(customerId, orderId);
     }
 
+    @BeerOrderPickupPermission
     @PutMapping("/orders/{orderId}/pickup")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void pickupOrder(@PathVariable("customerId") UUID customerId, @PathVariable("orderId") UUID orderId) {
