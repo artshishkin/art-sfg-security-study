@@ -17,12 +17,13 @@
 
 package com.artarkatesoft.securitystudy.web.controllers.api;
 
+import com.artarkatesoft.securitystudy.security.perms.BeerOrderCreatePermission;
+import com.artarkatesoft.securitystudy.security.perms.BeerOrderReadPermission;
 import com.artarkatesoft.securitystudy.services.BeerOrderService;
 import com.artarkatesoft.securitystudy.web.model.BeerOrderDto;
 import com.artarkatesoft.securitystudy.web.model.BeerOrderPagedList;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -43,14 +44,13 @@ public class BeerOrderController {
         this.beerOrderService = beerOrderService;
     }
 
-    @PreAuthorize("hasAuthority('order.read') OR " +
-            "hasAuthority('customer.order.read') AND @beerOrderAuthenticationManager.customerIdMatches(authentication,#customerId)")
+    @BeerOrderReadPermission
     @GetMapping("orders")
     public BeerOrderPagedList listOrders(@PathVariable("customerId") UUID customerId,
                                          @RequestParam(value = "pageNumber", required = false) Integer pageNumber,
-                                         @RequestParam(value = "pageSize", required = false) Integer pageSize){
+                                         @RequestParam(value = "pageSize", required = false) Integer pageSize) {
 
-        if (pageNumber == null || pageNumber < 0){
+        if (pageNumber == null || pageNumber < 0) {
             pageNumber = DEFAULT_PAGE_NUMBER;
         }
 
@@ -61,22 +61,22 @@ public class BeerOrderController {
         return beerOrderService.listOrders(customerId, PageRequest.of(pageNumber, pageSize));
     }
 
+    @BeerOrderCreatePermission
     @PostMapping("orders")
     @ResponseStatus(HttpStatus.CREATED)
-    public BeerOrderDto placeOrder(@PathVariable("customerId") UUID customerId, @RequestBody BeerOrderDto beerOrderDto){
+    public BeerOrderDto placeOrder(@PathVariable("customerId") UUID customerId, @RequestBody BeerOrderDto beerOrderDto) {
         return beerOrderService.placeOrder(customerId, beerOrderDto);
     }
 
-    @PreAuthorize("hasAuthority('order.read') OR " +
-            "hasAuthority('customer.order.read') AND @beerOrderAuthenticationManager.customerIdMatches(authentication,#customerId)")
+    @BeerOrderReadPermission
     @GetMapping("orders/{orderId}")
-    public BeerOrderDto getOrder(@PathVariable("customerId") UUID customerId, @PathVariable("orderId") UUID orderId){
+    public BeerOrderDto getOrder(@PathVariable("customerId") UUID customerId, @PathVariable("orderId") UUID orderId) {
         return beerOrderService.getOrderById(customerId, orderId);
     }
 
     @PutMapping("/orders/{orderId}/pickup")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void pickupOrder(@PathVariable("customerId") UUID customerId, @PathVariable("orderId") UUID orderId){
+    public void pickupOrder(@PathVariable("customerId") UUID customerId, @PathVariable("orderId") UUID orderId) {
         beerOrderService.pickupOrder(customerId, orderId);
     }
 }
