@@ -1,0 +1,7 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+  <form>
+      <input th:fragment="csrf" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+  </form>
+</body>
+</html>

@@ -42,9 +42,9 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.anonymous;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -167,6 +167,23 @@ class BeerControllerIT extends BaseIT {
                 .andExpect(status().is(httpStatus.value()));
     }
 
+    @ParameterizedTest(name = "#{index} with [{arguments}]")
+    @MethodSource({"post_newOrUpdateEndpoints"})
+    @DisplayName("Only Authenticated users should HAVE access to POST BEERS Endpoint")
+    void postNewOrUpdateBeerEndpointsTests(String url, String username, String password, HttpStatus httpStatus) throws Exception {
+        //given
+        Beer beer = beerRepository.findAll().get(0);
+        String urlParameter = beer.getId().toString();
+
+        //when
+        mockMvc.perform(
+                post(url, urlParameter)
+                        .with(csrf())
+                        .with(httpBasic(username, password)))
+                //then
+                .andExpect(status().is(httpStatus.value()));
+    }
+
     static Stream<Arguments> getEndpoints() {
         return Stream
                 .of("/beers/find", "/beers", "/beers/{beerId}")
@@ -186,6 +203,19 @@ class BeerControllerIT extends BaseIT {
                 .flatMap(url -> Stream
                         .of(
                                 Arguments.of(url, "art", "123", HttpStatus.OK),
+                                Arguments.of(url, "secondUser", "pass222", HttpStatus.FORBIDDEN),
+                                Arguments.of(url, "scott", "tiger", HttpStatus.FORBIDDEN),
+                                Arguments.of(url, "foo", "buzz", HttpStatus.UNAUTHORIZED)
+                        )
+                );
+    }
+
+    static Stream<Arguments> post_newOrUpdateEndpoints() {
+        return Stream
+                .of("/beers/new", "/beers/{beerId}/edit")
+                .flatMap(url -> Stream
+                        .of(
+                                Arguments.of(url, "art", "123", HttpStatus.FOUND),
                                 Arguments.of(url, "secondUser", "pass222", HttpStatus.FORBIDDEN),
                                 Arguments.of(url, "scott", "tiger", HttpStatus.FORBIDDEN),
                                 Arguments.of(url, "foo", "buzz", HttpStatus.UNAUTHORIZED)
