@@ -34,9 +34,11 @@
         <div th:if="${param.logout}" class="alert alert-success">You have successfully Logged out</div>
         <form th:action="@{/login}" class="form-group" method="post">
             <label for="username">Username</label>
-            <input type="text" id="username" name="username" autofocus="true" autocomplete="off" class="form-control">
+            <input type="text" id="username" name="username" autofocus="true" autocomplete="off">
             <label for="password">Password</label>
-            <input type="text" id="password" name="password" autofocus="true" autocomplete="off" class="form-control">
+            <input type="text" id="password" name="password" autofocus="true" autocomplete="off">
+            <label for="remember-me">Remember Me:</label>
+            <input type="checkbox" id="remember-me" name="remember-me">
             <input type="submit" value="Log In">
         </form>
     </div>
