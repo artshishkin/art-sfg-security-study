@@ -16,6 +16,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.data.repository.query.SecurityEvaluationContextExtension;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
@@ -28,6 +29,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 //    JpaUserDetailsService jpaUserDetailsService;
 
     private final UserDetailsService userDetailsService;
+    private final PersistentTokenRepository tokenRepository;
 
     //needed to use with Spring Data JPA SpEL
     public SecurityEvaluationContextExtension securityEvaluationContextExtension() {
@@ -87,7 +89,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 )
                 .httpBasic()
                 .and()
-                .rememberMe().key("art-key").userDetailsService(userDetailsService);
+                .rememberMe().tokenRepository(tokenRepository).userDetailsService(userDetailsService);
+//                .rememberMe().key("art-key").userDetailsService(userDetailsService);
 
 //        h2 console config
         http.headers().frameOptions().sameOrigin();
