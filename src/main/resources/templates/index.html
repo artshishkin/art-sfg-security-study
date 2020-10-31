@@ -30,7 +30,8 @@
 
 <div class="row" sec:authorize="isAnonymous()">
     <div class="col-md-12">
-        <div th:if="${param.error}" class="alert alert-danger">Invalid Username or Password</div>
+        <div th:if="${session['SPRING_SECURITY_LAST_EXCEPTION']?.message == 'Bad credentials'}" class="alert alert-danger">Invalid Username or Password</div>
+        <div th:if="${session['SPRING_SECURITY_LAST_EXCEPTION']?.message == 'User account is locked'}" class="alert alert-danger">User account is locked</div>
         <div th:if="${param.logout}" class="alert alert-success">You have successfully Logged out</div>
         <form th:action="@{/login}" class="form-group" method="post">
             <label for="username">Username</label>
@@ -58,6 +59,5 @@
              th:src="@{/resources/images/brewery.png}"/>
     </div>
 </div>
-
 </body>
 </html>
