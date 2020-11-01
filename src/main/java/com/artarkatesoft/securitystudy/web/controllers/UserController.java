@@ -1,6 +1,7 @@
 package com.artarkatesoft.securitystudy.web.controllers;
 
 import com.artarkatesoft.securitystudy.domain.security.User;
+import com.artarkatesoft.securitystudy.repositories.security.UserRepository;
 import com.warrenstrange.googleauth.GoogleAuthenticator;
 import com.warrenstrange.googleauth.GoogleAuthenticatorKey;
 import com.warrenstrange.googleauth.GoogleAuthenticatorQRGenerator;
@@ -21,13 +22,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class UserController {
 
     private final GoogleAuthenticator googleAuthenticator;
+    private final UserRepository userRepository;
 
     @GetMapping("register2fa")
     public String register2fa(Model model) {
 
         User user = getUser();
         GoogleAuthenticatorKey googleAuthKey = googleAuthenticator.createCredentials(user.getUsername());
-        String url = GoogleAuthenticatorQRGenerator.getOtpAuthURL("ArtArKateSoft", user.getUsername(), googleAuthKey );
+        String url = GoogleAuthenticatorQRGenerator.getOtpAuthURL("ArtArKateSoft", user.getUsername(), googleAuthKey);
 
         log.debug("Google QR Code URL: {}", url);
 
@@ -35,13 +37,23 @@ public class UserController {
         return "user/register2fa";
     }
 
-    private User getUser() {
-        return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    }
-
     @PostMapping("register2fa")
     public String confirm2fa(@RequestParam Integer verifyCode) {
-        log.debug("Verify Code {}", verifyCode);
-        return "index";
+
+        log.debug("Entered Code is {}", verifyCode);
+
+        User user = getUser();
+        if (googleAuthenticator.authorizeUser(user.getUsername(), verifyCode)) {
+            user.setUserGoogle2fa(true);
+            userRepository.save(user);
+            return "/index";
+        } else {
+            //wrong code
+            return "user/register2fa";
+        }
+    }
+
+    private User getUser() {
+        return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 }
