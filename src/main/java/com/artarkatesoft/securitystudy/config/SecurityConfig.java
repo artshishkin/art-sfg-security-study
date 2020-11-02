@@ -5,8 +5,11 @@ import com.artarkatesoft.securitystudy.security.RestUrlAuthFilter;
 import com.artarkatesoft.securitystudy.security.SfgRestHeaderAuthFilter;
 import com.artarkatesoft.securitystudy.security.google.Google2faFilter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.data.repository.query.SecurityEvaluationContextExtension;
@@ -15,9 +18,9 @@ import org.springframework.security.web.authentication.rememberme.PersistentToke
 import org.springframework.security.web.session.SessionManagementFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
-//@Configuration
-//@EnableWebSecurity
-//@EnableGlobalMethodSecurity(prePostEnabled = true)
+@Configuration
+@EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 @RequiredArgsConstructor
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
@@ -65,6 +68,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .csrf().ignoringAntMatchers("/h2-console/**", "/api/**");
 
         http
+                .cors().and()
+
                 .authorizeRequests(authorize ->
                         authorize
                                 .antMatchers("/h2-console/**").permitAll()  //do not use in production!!!
