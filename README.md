@@ -9,7 +9,23 @@
 
 ### Brewery Spring MVC Monolith
 
+#### Section 16: Two Factor Authentication
 
+-  use `FreeOTP` Authenticator from Red Hat inc. with the settings from John Tompson
+
+```java 
+GoogleAuthenticatorConfig.GoogleAuthenticatorConfigBuilder configBuilder = new GoogleAuthenticatorConfig.GoogleAuthenticatorConfigBuilder();
+configBuilder
+        .setTimeStepSizeInMillis(TimeUnit.SECONDS.toMillis(60))
+        .setWindowSize(10)
+        .setNumberOfScratchCodes(0);
+```
+
+-  or `Google Authenticator` but change config to 30 seconds TimeStepSize 
+
+```java
+setTimeStepSizeInMillis(TimeUnit.SECONDS.toMillis(30))
+```
 
 
 [springver]: https://img.shields.io/badge/dynamic/xml?label=Spring%20Boot&query=%2F%2A%5Blocal-name%28%29%3D%27project%27%5D%2F%2A%5Blocal-name%28%29%3D%27parent%27%5D%2F%2A%5Blocal-name%28%29%3D%27version%27%5D&url=https%3A%2F%2Fraw.githubusercontent.com%2Fartshishkin%2Fart-sfg-security-study%2Fmaster%2Fpom.xml&logo=Spring&labelColor=white&color=grey

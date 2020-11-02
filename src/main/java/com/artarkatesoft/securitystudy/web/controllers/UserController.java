@@ -44,11 +44,14 @@ public class UserController {
 
         User user = getUser();
         if (googleAuthenticator.authorizeUser(user.getUsername(), verifyCode)) {
-            user.setUseGoogle2fa(true);
-            userRepository.save(user);
+            log.debug("User {} is authorized", user.getUsername());
+            User savedUser = userRepository.findById(user.getId()).orElseThrow();
+            savedUser.setUseGoogle2fa(true);
+            userRepository.save(savedUser);
             return "/index";
         } else {
             //wrong code
+            log.debug("User {} is NOT authorized", user.getUsername());
             return "user/register2fa";
         }
     }
