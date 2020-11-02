@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+@CrossOrigin
 @Slf4j
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/")
@@ -120,6 +121,7 @@ public class BeerRestController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+//    @CrossOrigin
     @DeleteMapping({"beer/{beerId}"})
     @BeerDeletePermission
     @ResponseStatus(HttpStatus.NO_CONTENT)
